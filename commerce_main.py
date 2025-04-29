@@ -1,19 +1,4 @@
-#start of announcments :D
-#HIT 1000 LINES OF CODEEE LETS GOO :D
-#end of announcments
 
-
-
-#tasks
-# addd 3 account types btw, vendor, admin, customer
-
-# Allow admin users to add, update, or delete products. and give a reason opn why they rtemoved ur acc or banned ur ass
-#end of tasks
-# Vender ACCOUNT: "To sell products, create a vendor account. You'll get access to selling tools, trending products, " "and advertising features." make sure it shows other users too btw too make it advanced
-# chnage how it uses product id to the name of the product instead or both
-#end of tasks
-
-# start of imports
 import smtplib
 import random
 import os
@@ -26,8 +11,8 @@ from difflib import get_close_matches
 import requests
 #end of imports
 
-sender_email = 'nagamanojp@gmail.com'
-sender_password = 'nwwneuyfititykck'
+sender_email = 'yourgmailapiemail'
+sender_password = 'yourgmailapipassword'
 positive_responses = {'y', 'yes', 'ye', 'why not', 'sure', 'certainly', 'for sure', 'of course', 'obviously', 'ok', 'fuck yeah'}
 negative_responses = {'no', 'n', 'nah', 'na', 'nope', 'not feeling it', 'obviously not', 'hell no'}
 ur_account = None
@@ -53,14 +38,15 @@ discounts = {
                         "carti": 0.15,  # 15% off
                         "schyeah": 0.5  # 50% off
                     }
-API_KEY = '9eedc1631ae7d7847e3e3592'
-BASE_URL = 'https://v6.exchangerate-api.com/v6'
+conn = get_db_connection()
+API_KEY = 'APIKEYFORCONEVRTINGCURRENCY'
+BASE_URL = 'BASEURLFORCONVERTINCURRENCY'
 def get_db_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Sairam@09",
-        database="fweah_ecommerce"
+        password="sqlpassword",
+        database="sqldatabase"
     )
 def load_accounts():
     try:
@@ -91,7 +77,6 @@ def load_accounts():
 
 def save_account(account_details):
     try:
-        connection = get_db_connection()
         cursor = connection.cursor()
 
         cursor.execute("""
@@ -290,10 +275,10 @@ def create_acc(accounts):
             "account_name": username,
             "password": password,
             "account_type": account_type,
-            "balance": suck,  # Default balance
+            "balance": suck, 
             "budget": 0.0, 
-            "send_email": False,  # Default value
-            "is_restricted": False,  # Default restriction status
+            "send_email": False,
+            "is_restricted": False, 
             "currency": typed
         }
         save_account(accounts)
@@ -312,7 +297,6 @@ def submit_review(user_id, product_id, rating, review):
     connection = get_db_connection()
     cursor = connection.cursor()
 
-    # Insert the review into the database
     try:
         cursor.execute(
             "INSERT INTO reviews (user_id, product_id, rating, review) VALUES (%s, %s, %s, %s)",
@@ -334,7 +318,6 @@ def user_submit_review(user_id):
     print("Rate and review a product: ")
     product_id = input("Enter the product ID: ")
     
-    # Validate rating input
     while True:
         try:
             rating = int(input("Rate the product (1-5): "))
@@ -347,7 +330,6 @@ def user_submit_review(user_id):
 
     review = input("Write your review: ")
 
-    # Submit review to the database
     submit_review(user_id, product_id, rating, review)
 
 def show_reviews(product_id):
@@ -560,8 +542,8 @@ def log_recently_viewed(account_name, product_id):
     conn = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Sairam@09",
-        database="fweah_ecommerce"
+        password="sqlpassword",
+        database="sqldatabase"
     )
     cursor = conn.cursor()
 
@@ -580,8 +562,8 @@ def get_recently_viewed(account_name):
     conn = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Sairam@09",
-        database="fweah_ecommerce"
+        password="sqlpassword",
+        database="sqldatabase"
     )
     cursor = conn.cursor()
 
@@ -606,12 +588,11 @@ def spin_the_wheel(account_name):
     conn = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Sairam@09",
-        database="fweah_ecommerce"
+        password="sqlpassword",
+        database="sqldatabase"
     )
     cursor = conn.cursor()
 
-    # Check if the user has already spun today
     query = "SELECT last_spin_date FROM daily_spin WHERE account_name = %s"
     cursor.execute(query, (account_name,))
     result = cursor.fetchone()
@@ -637,11 +618,9 @@ def spin_the_wheel(account_name):
         print(f"🎉 Congratulations {account_name}! You won: {reward} 🎉")
 
         if result:
-            # Update existing spin record
             update_query = "UPDATE daily_spin SET last_spin_date = %s, reward = %s WHERE account_name = %s"
             cursor.execute(update_query, (today, reward, account_name))
         else:
-            # Insert new spin record
             insert_query = "INSERT INTO daily_spin (account_name, last_spin_date, reward) VALUES (%s, %s, %s)"
             cursor.execute(insert_query, (account_name, today, reward))
 
@@ -651,21 +630,20 @@ def spin_the_wheel(account_name):
     conn.close()
 
 def apply_discount(total_cost, discount_code):
-    """Applies a discount if a valid discount code is entered."""
     if discount_code in discount_codes:
         discount = discount_codes[discount_code]
 
-        if isinstance(discount, float):  # Percentage discount
+        if isinstance(discount, float): 
             discount_amount = round(total_cost * discount, 2)
-        else:  # Fixed amount discount
+        else:  
             discount_amount = discount
 
-        final_price = max(0, round(total_cost - discount_amount, 2))  # Prevent negative prices
+        final_price = max(0, round(total_cost - discount_amount, 2)) 
         print(f"✅ Discount Applied: -${discount_amount:.2f}")
         return final_price
     else:
         print("❌ Invalid discount code.")
-        return total_cost  # No discount applied
+        return total_cost  
 
 def checkout(account_name):
     conn = get_db_connection()
@@ -675,7 +653,6 @@ def checkout(account_name):
     result = cursor.fetchone()
     points = result['loyalty_points'] if result else 0
 
-    # Retrieve cart items
     cursor.execute("SELECT product_id, product_name, price, quantity FROM cart WHERE account_name = %s", (account_name,))
     cart_items = cursor.fetchall()
 
@@ -683,7 +660,6 @@ def checkout(account_name):
         print("Your cart is empty. Add some products first.")
         return
 
-    # Calculate total cost
     total_cost = sum(item['price'] * item['quantity'] for item in cart_items)
     print(f"\nTotal cost: ${total_cost:.2f}")
 
@@ -699,14 +675,14 @@ def checkout(account_name):
                 WHERE account_name = %s
             """, (account_name,))
             print(f"You used {points} points for a ${discounty:.2f} discount.")
-            update_loyalty(account_name, 0)  # Re-evaluate tier
+            update_loyalty(account_name, 0) 
 
     import time
     time.sleep(0.79)
     discount_code = input("Enter a discount code (or press Enter to skip): ").upper()
     total_cost = apply_discount(total_cost, discount_code)
 
-    # Check user balance
+   
     cursor.execute("SELECT balance FROM accounts WHERE account_name = %s", (account_name,))
     account = cursor.fetchone()
 
@@ -714,7 +690,6 @@ def checkout(account_name):
         new_balance = round(account['balance'] - total_cost, 2)
         cursor.execute("UPDATE accounts SET balance = %s WHERE account_name = %s", (new_balance, account_name))
 
-        # 🛒 Insert each purchased item into the orders table
         for item in cart_items:
             cursor.execute("""
                 INSERT INTO orders (product_id, customer_name, quantity)
@@ -740,8 +715,8 @@ def sell_product(vendor_name):
     conn = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Sairam@09",
-        database="fweah_ecommerce"
+        password="sqlpassword",
+        database="sqldatabase"
     )
     randome = random.randint(1, 100000000)
     cursor = conn.cursor()
@@ -776,8 +751,8 @@ def view_my_products(vendor_name):
     conn = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Sairam@09",
-        database="fweah_ecommerce"
+        password="sqlpassword",
+        database="sqldatabase"
     )
     cursor = conn.cursor()
 
@@ -802,11 +777,9 @@ def view_my_products(vendor_name):
 
     print("\n📋 Your Listed Products:")
 
-    # Print a nice header
     print(f"{'ID':<5}{'Name':<25}{'Category':<15}{'Price':<10}{'Stock':<10}{'Created At'}")
-    print("-" * 75)  # Just a separator line for readability
+    print("-" * 75)  
 
-    # Loop through each product and display it
     for product in products:
         id, name, description, price, stock, category, created_at = product
         print(f"{id:<5}{name:<25}{category:<15}${price:<10}{stock:<10}{created_at}")
@@ -817,7 +790,6 @@ def respond_to_reviews(vendor_name):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # Fetch all reviews for this vendor's products
     cursor.execute("""
         SELECT r.id, r.product_id, r.review_text, r.response, p.name AS product_name
         FROM reviews r
@@ -853,7 +825,6 @@ def respond_to_reviews(vendor_name):
         conn.close()
         return
 
-    # Make sure the review belongs to one of their products
     matching_review = next((rev for rev in reviews if rev['id'] == review_id), None)
     if not matching_review:
         print("Review not found or doesn't belong to your products.")
@@ -863,7 +834,6 @@ def respond_to_reviews(vendor_name):
 
     response = input("Write your response to the customer: ").strip()
 
-    # Update the review with vendor's response
     cursor.execute("""
         UPDATE reviews
         SET response = %s
@@ -881,8 +851,8 @@ def update_my_product(vendor_name):
     conn = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Sairam@09",
-        database="fweah_ecommerce"
+        password="sqlpassword",
+        database="sqldatabase"
     )
     cursor = conn.cursor()
     query = """
@@ -903,10 +873,9 @@ def update_my_product(vendor_name):
     product_found = None
     dang = 0
 
-    # Find the product by name
     while product_found is None and dang <= 5:
         for product in products:
-            if sus.lower() == product[1].lower():  # Compare product name, case insensitive
+            if sus.lower() == product[1].lower(): 
                 product_found = product
                 break
 
@@ -923,12 +892,10 @@ def update_my_product(vendor_name):
                 sus = input("Sorry, we couldn't find your product. Please re-enter the name: ").strip()
                 dang += 1
 
-    # If product is found, proceed with updating
     if product_found:
         print(f"You selected: {product_found[1]}")
         what = input("What would you like to update about it? (Name, Description, Price, Stock, Category): ").lower()
 
-        # Fields that cannot be updated
         listy = ["id", "created at"]
         while what in listy:
             print(f"Sorry, you can't change that. Please update something else or type 'exit' to quit.")
@@ -938,7 +905,6 @@ def update_my_product(vendor_name):
                 print("Alright, have a great day :D")
                 return
 
-        # Handle product updates
         if what == "name":
             new_name = input("Enter the new product name: ")
             query = "UPDATE products SET name = %s WHERE id = %s"
@@ -969,12 +935,11 @@ def delete_my_product(vendor_name):
     conn = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Sairam@09",
-        database="fweah_ecommerce"
+        password="sqlpassword",
+        database="sqldatabase"
     )
     cursor = conn.cursor()
 
-    # Fetch products for the given vendor
     query = """
     SELECT id, name, stock
     FROM products
@@ -983,23 +948,19 @@ def delete_my_product(vendor_name):
     cursor.execute(query, (vendor_name,))
     products = cursor.fetchall()
 
-    # Check if the vendor has any products
     if not products:
         print("You have no products listed.")
         return
 
-    # Display the products
     print("Here are your products:")
     for product in products:
         print(f"ID: {product[0]}, Name: {product[1]}")
 
-    # Ask which product the vendor wants to update
     sus = input("Which product would you like to delete? ").strip()
     product_found = None
 
-    # Find the product by name
     for product in products:
-        if sus.lower() == product[1].lower():  # Compare product name, case insensitive
+        if sus.lower() == product[1].lower(): 
             product_found = product
             break
 
@@ -1025,12 +986,11 @@ def update_inventory(vendor_name):
     conn = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Sairam@09",
-        database="fweah_ecommerce"
+        password="sqlpassword",
+        database="sqldatabase"
     )
     cursor = conn.cursor()
 
-    # Fetch products for the given vendor
     query = """
     SELECT id, name, stock
     FROM products
@@ -1039,23 +999,19 @@ def update_inventory(vendor_name):
     cursor.execute(query, (vendor_name,))
     products = cursor.fetchall()
 
-    # Check if the vendor has any products
     if not products:
         print("You have no products listed.")
         return
 
-    # Display the products
     print("Here are your products:")
     for product in products:
         print(f"ID: {product[0]}, Name: {product[1]}, Stock: {product[2]}")
 
-    # Ask which product the vendor wants to update
     sus = input("Which product would you like to update the stock for? ").strip()
     product_found = None
 
-    # Find the product by name
     for product in products:
-        if sus.lower() == product[1].lower():  # Compare product name, case insensitive
+        if sus.lower() == product[1].lower():  
             product_found = product
             break
 
@@ -1070,7 +1026,6 @@ def update_inventory(vendor_name):
             print("Invalid input. Please enter a valid number for the stock.")
             return
 
-        # Update the product's stock in the database
         query = "UPDATE products SET stock = %s WHERE id = %s"
         cursor.execute(query, (new_stock, product_found[0]))
         conn.commit()
@@ -1087,25 +1042,22 @@ def manage_discounts():
     conn = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Sairam@09",
-        database="fweah_ecommerce"
+        password="sqlpassword",
+        database="sqldatabase"
     )
     cursor = conn.cursor()
 
     sigma = input("What is the name of the discount you want to create? ").strip()
-    diog = float(input("How much percent is the discount (don't include the % symbol, just the number)? "))
+    hi = float(input("How much percent is the discount (don't include the % symbol, just the number)? "))
     
-    # Convert to decimal
-    diog = diog / 100
-    diog = round(diog, 2)
+    hi = hi / 100
+    hi = round(hi, 2)
 
-    # Ask if it applies to a specific product
     target_type = input("Is this discount for a 'specific product' or 'sitewide'? ").lower()
 
     if target_type == "specific product":
         product_name = input("Enter the name of the product this discount applies to: ").strip()
 
-        # Optional: check if product exists first
         cursor.execute("SELECT id FROM products WHERE name = %s", (product_name,))
         product = cursor.fetchone()
 
@@ -1115,14 +1067,13 @@ def manage_discounts():
             conn.close()
             return
 
-        # Insert discount into discounts table
         query = """
         INSERT INTO discounts (discount_name, discount_percent, product_id)
         VALUES (%s, %s, %s)
         """
-        cursor.execute(query, (sigma, diog, product[0]))
+        cursor.execute(query, (sigma, hi, product[0]))
         conn.commit()
-        print(f"✅ Discount '{sigma}' of {diog*100}% created for product '{product_name}'!")
+        print(f"✅ Discount '{sigma}' of {hi*100}% created for product '{product_name}'!")
 
     elif target_type == "sitewide":
         # Insert sitewide discount
@@ -1130,9 +1081,9 @@ def manage_discounts():
         INSERT INTO discounts (discount_name, discount_percent, product_id)
         VALUES (%s, %s, NULL)
         """
-        cursor.execute(query, (sigma, diog))
+        cursor.execute(query, (sigma, hi))
         conn.commit()
-        print(f"✅ Sitewide discount '{sigma}' of {diog*100}% created!")
+        print(f"✅ Sitewide discount '{sigma}' of {hi*100}% created!")
 
     else:
         print("❌ Invalid discount type. Please choose either 'specific product' or 'sitewide'.")
@@ -1165,7 +1116,7 @@ def redeem_points(account_name):
         """, (account_name,))
         conn.commit()
         print("You redeemed 50 points for a reward!")
-        update_loyalty(account_name, 0)  # Re-evaluate tier
+        update_loyalty(account_name, 0)  
     else:
         print(f"Not enough points to redeem. You have {points} points.")
 
@@ -1185,8 +1136,8 @@ def order_history(account_name):
     conn = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Sairam@09",
-        database="fweah_ecommerce"
+        password="sqlpassword",
+        database="sqldatabase"
     )
     cursor = conn.cursor()
 
@@ -1216,10 +1167,10 @@ def account_info(account_name):
     conn = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Sairam@09",
-        database="fweah_ecommerce"
+        password="sqlpassword",
+        database="sqldatabase"
     )
-    cursor = conn.cursor(dictionary=True)  # Fetch results as a dictionary
+    cursor = conn.cursor(dictionary=True) 
 
     query = """
     SELECT * FROM accounts WHERE account_name = %s;
@@ -1267,19 +1218,16 @@ def add_to_cart_search(accounts, name, product_name):
                 connection = get_db_connection()
                 cursor = connection.cursor()
 
-                # Check if the product already exists in the cart
                 cursor.execute("SELECT quantity FROM cart WHERE account_name = %s AND product_name = %s", 
                                (accounts[name], product_name))
                 existing_item = cursor.fetchone()
 
                 if existing_item:
-                    # Update quantity if already in cart
                     new_quantity = existing_item["quantity"] + 1
 
                     cursor.execute("UPDATE cart SET quantity = %s WHERE account_name = %s AND product_name = %s", 
                                    (new_quantity, accounts[name], product_name))
                 else:
-                    # Insert new product into cart
                     cursor.execute("INSERT INTO cart (account_name, product_id, product_name, price, quantity) VALUES (%s, %s, %s, %s, %s)", 
                                    (accounts[name], product['id'], product['name'], product['price'], 1))
                 
@@ -1293,30 +1241,24 @@ def add_to_cart_search(accounts, name, product_name):
 
 
 def init_loyalty(account_name):
-    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("INSERT INTO loyalty (account_name) VALUES (%s)", (account_name,))
     conn.commit()
     conn.close()
     print(f"Loyalty record created for {account_name}.")
 
-# Update loyalty points and tier
 def update_loyalty(account_name, points_earned):
-    conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Add points
     cursor.execute("""
         UPDATE loyalty 
         SET loyalty_points = loyalty_points + %s 
         WHERE account_name = %s
     """, (points_earned, account_name))
 
-    # Get updated point total
     cursor.execute("SELECT loyalty_points FROM loyalty WHERE account_name = %s", (account_name,))
     points = cursor.fetchone()[0]
 
-    # Update tier
     if points >= 200:
         tier = "Platinum"
     elif points >= 100:
@@ -1336,10 +1278,8 @@ def update_loyalty(account_name, points_earned):
     conn.close()
     print(f"{account_name} earned {points_earned} points. New total: {points}, Tier: {tier}.")
 
-# Redeem points
 
 
-# Check current status
 def get_loyalty_status(account_name):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -1364,7 +1304,6 @@ def log_query_json(query):
         "user_query": query
     }
 
-    # Load existing logs or create new
     if os.path.exists("freak.json"):
         with open("freak.json", "r") as f:
             try:
@@ -1381,16 +1320,9 @@ def log_query_json(query):
 
 
 def view_sales_report(vendor_name):
-    # Connect to the database
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="Sairam@09",
-        database="fweah_ecommerce"
-    )
+
     cursor = conn.cursor()
 
-    # Fetch total units sold and total revenue for the vendor
     query_total = """
     SELECT 
         SUM(o.quantity) AS total_units_sold,
@@ -1437,13 +1369,7 @@ def view_sales_report(vendor_name):
 
 
 def advertise_product(vendor_name):
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="Sairam@09",
-        database="fweah_ecommerce"
-    )
-    cursor = conn.cursor()
+
 
     # Fetch the vendor's products
     query = """
@@ -1561,12 +1487,7 @@ def contact_support():
         print("Sorry, I couldn't understand your question. Please try rephrasing or submit your query directly at https://forms.gle/YNbVze7Frzj8v37v6")
         
 def get_recommendations(account_name):
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="Sairam@09",
-        database="fweah_ecommerce"
-    )
+
     cursor = conn.cursor(dictionary=True)
 
     # Step 1: Get most frequently purchased categories by the user
